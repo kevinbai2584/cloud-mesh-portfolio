@@ -1,0 +1,52 @@
+# Environment & Secrets (CRITICAL)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+
+# Java / Maven / Gradle
+target/
+*.class
+.mvn/
+*.jar
+*.war
+.gradle/
+build/
+
+# Node / Frontend
+node_modules/
+dist/
+.output/
+.cache/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Python / FastAPI
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+.pytest_cache/
+
+# IDE / Editor Files
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Vector DB / Local Run Storage
+infra/docker/data/
+chroma_data/
+*.log
