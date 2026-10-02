@@ -1,0 +1,13 @@
+{
+  "name": "cloud-mesh-frontend-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build:remotes": "concurrently -n \"b-profile,b-telemetry,b-agent\" -c \"cyan,magenta,yellow\" \"npm --prefix mfe-profile run build\" \"npm --prefix mfe-telemetry run build\" \"npm --prefix mfe-agent run build\"",
+    "start:all": "concurrently --kill-others -n \"host:5000,profile:5001,telemetry:5002,agent:5003\" -c \"blue,cyan,magenta,yellow\" \"npm --prefix shell-host run dev\" \"npm --prefix mfe-profile run preview\" \"npm --prefix mfe-telemetry run preview\" \"npm --prefix mfe-agent run preview\"",
+    "dev": "npm run build:remotes && npm run start:all"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}
