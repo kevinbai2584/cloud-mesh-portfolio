@@ -30,7 +30,30 @@ async def node_query_analysis(state: AgentState) -> Dict[str, Any]:
     return {"intent": intent}
 
 async def node_hybrid_retrieval(state: AgentState) -> Dict[str, Any]:
-    """Retrieve dense vector chunks using persistent ChromaDB."""
+    """
+    Node: Hybrid Document Retrieval (BM25 Sparse + Dense Cosine HNSW)
+    ==============================================================================
+    PROS (ADVANTAGES):
+    1. Precision on Exact Technical Tokens:
+       - Pure dense embeddings often suffer from semantic drift on out-of-vocabulary 
+         identifiers (e.g., custom Pintos syscalls like 'sys_wait', CPU registers, or Kafka configs).
+       - BM25 guarantees high recall when rare exact tokens match target context chunks.
+    2. Resilient Score Fusion via RRF:
+       - Reciprocal Rank Fusion (1 / (k + rank)) normalizes and combines unbounded 
+         BM25 scores with bounded cosine similarity without fragile heuristic thresholds.
+    3. 100% Privacy & Zero-Cost:
+       - In-process execution with ChromaDB and rank-bm25 ensures zero third-party API 
+         latency and total data confinement.
+
+    CONS (DISADVANTAGES & TRADEOFFS):
+    1. In-Memory Token Indexing:
+       - BM25 builds and caches an inverted index in RAM, introducing memory overhead 
+         for very large corpora (> 100k chunks).
+    2. Lack of Morphological Stemming:
+       - Basic regex tokenization may overlook complex grammatical variations compared 
+         to dedicated Lucene / Elasticsearch engines.
+    ==============================================================================
+    """
     chunks = retrieve_relevant_chunks(state["query"], top_k=2)
     return {"retrieved_chunks": chunks}
 
