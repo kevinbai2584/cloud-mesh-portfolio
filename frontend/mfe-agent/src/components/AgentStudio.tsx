@@ -112,7 +112,7 @@ function AgentStudio() {
             try {
               const event = JSON.parse(dataStr);
 
-              // 阶段推进事件
+              // Stage transition event
               if (event.type === 'stage') {
                 setActiveNode(event.node);
                 setCompletedNodes((prev) =>
@@ -120,7 +120,7 @@ function AgentStudio() {
                 );
               }
 
-              // 真实 RAG 切片数据事件
+              // Real RAG retrieved chunks event
               if (event.type === 'sources' && event.chunks) {
                 setMessages((prev) =>
                   prev.map((msg) =>
@@ -129,7 +129,7 @@ function AgentStudio() {
                 );
               }
 
-              // 打字机 Token 事件
+              // Streaming typewriter token event
               if (event.type === 'token' && event.delta) {
                 setMessages((prev) =>
                   prev.map((msg) =>
@@ -140,7 +140,7 @@ function AgentStudio() {
                 );
               }
             } catch {
-              // 忽略解析碎片
+              // Ignore partial stream chunks
             }
           }
         }
@@ -166,7 +166,7 @@ function AgentStudio() {
 
   return (
     <div style={{ color: '#f1f5f9', fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
-      {/* 模块头部栏 */}
+      {/* Module Header Bar */}
       <div style={{ borderBottom: '1px solid #1e293b', paddingBottom: 20, marginBottom: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
         <div>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '4px 12px', borderRadius: 9999, backgroundColor: 'rgba(168,85,247,0.1)', border: '1px solid rgba(168,85,247,0.3)', color: '#c084fc', fontSize: 12, fontWeight: 600, marginBottom: 8 }}>
@@ -187,7 +187,7 @@ function AgentStudio() {
         </div>
       </div>
 
-      {/* 动态 LangGraph 流程看板 */}
+      {/* Dynamic LangGraph Workflow Dashboard */}
       <div
         style={{
           backgroundColor: '#070b14',
@@ -255,7 +255,7 @@ function AgentStudio() {
         </div>
       </div>
 
-      {/* 预设提问胶囊 */}
+      {/* Preset Prompt Pills */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
         {PRESET_PROMPTS.map((prompt, idx) => (
           <button
@@ -279,7 +279,7 @@ function AgentStudio() {
         ))}
       </div>
 
-      {/* 对话列表区 */}
+      {/* Chat Messages Container */}
       <div
         style={{
           backgroundColor: '#0f172a',
@@ -349,7 +349,7 @@ function AgentStudio() {
                     {msg.content || (isStreaming ? 'Executing LangGraph agent nodes...' : '')}
                   </ReactMarkdown>
 
-                  {/* 核心亮点：RAG 真实检索来源证据卡片 */}
+                  {/* Core Feature: Ground-Truth RAG Evidence Cards */}
                   {msg.sources && msg.sources.length > 0 && (
                     <div style={{ marginTop: 14, borderTop: '1px dashed #1e293b', paddingTop: 10 }}>
                       <button
@@ -422,7 +422,7 @@ function AgentStudio() {
         <div ref={chatBottomRef} />
       </div>
 
-      {/* 底部输入框 */}
+      {/* Input Action Bar */}
       <div style={{ display: 'flex', gap: 12 }}>
         <input
           type="text"

@@ -10,7 +10,7 @@ volumes:
   kafka_data:
 
 services:
-  # 1. 关系型持久化主库 (PostgreSQL 16)
+  # 1. Relational Persistence Primary Database (PostgreSQL 16)
   postgres:
     image: postgres:16-alpine
     container_name: mesh-postgres
@@ -32,7 +32,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # 2. 网关限流与高频缓存 (Redis 7)
+  # 2. Gateway Rate Limiting & High-Frequency Cache (Redis 7)
   redis:
     image: redis:7-alpine
     container_name: mesh-redis
@@ -49,7 +49,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # 3. 异步事件骨干 (Apache Kafka - KRaft Mode)
+  # 3. Asynchronous Event Backbone (Apache Kafka - KRaft Mode)
   kafka:
     image: confluentinc/cp-kafka:7.6.0
     container_name: mesh-kafka
@@ -82,7 +82,7 @@ services:
       timeout: 10s
       retries: 5
 
-  # 4. Kafka 网页可视化控制台 (方便调试消息 Topic)
+  # 4. Kafka Web UI Dashboard (Topic Inspection and Debugging)
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     container_name: mesh-kafka-ui

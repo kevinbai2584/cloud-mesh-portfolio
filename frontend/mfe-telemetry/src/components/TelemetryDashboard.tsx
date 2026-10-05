@@ -20,7 +20,7 @@ function TelemetryDashboard() {
 
   const fetchActuatorMetrics = async () => {
     try {
-      // 1. 获取 JVM 堆内存指标
+      // 1. Fetch JVM heap memory metrics
       const jvmRes = await fetch('/actuator/metrics/jvm.memory.used');
       const jvmMaxRes = await fetch('/actuator/metrics/jvm.memory.max');
       let jvmStr = '128 MB / 512 MB';
@@ -32,7 +32,7 @@ function TelemetryDashboard() {
         jvmStr = `${usedMb} MB / ${maxMb > 0 ? maxMb + ' MB' : 'Unlimited'}`;
       }
 
-      // 2. 获取 CPU 负载
+      // 2. Fetch process CPU load
       const cpuRes = await fetch('/actuator/metrics/process.cpu.usage');
       let cpuVal = '0.5%';
       if (cpuRes.ok) {
@@ -41,7 +41,7 @@ function TelemetryDashboard() {
         cpuVal = `${rawCpu.toFixed(2)}%`;
       }
 
-      // 3. 获取 HTTP 请求总数
+      // 3. Fetch total HTTP server requests count
       const httpRes = await fetch('/actuator/metrics/http.server.requests');
       let totalReqs = 'Active';
       if (httpRes.ok) {
@@ -79,7 +79,7 @@ function TelemetryDashboard() {
 
       setLastRefreshed(new Date().toLocaleTimeString());
     } catch {
-      // 容错降级
+      // Fallback / graceful degradation
       setLastRefreshed(new Date().toLocaleTimeString());
     }
   };
@@ -104,7 +104,7 @@ function TelemetryDashboard() {
   return (
     <div style={{ color: '#f1f5f9', fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
       
-      {/* 模块标头 */}
+      {/* Module Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16, marginBottom: 28, borderBottom: '1px solid #1e293b', paddingBottom: 20 }}>
         <div>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '4px 12px', borderRadius: 9999, backgroundColor: 'rgba(56,189,248,0.1)', border: '1px solid rgba(56,189,248,0.25)', color: '#38bdf8', fontSize: 12, fontWeight: 600, marginBottom: 8 }}>
@@ -141,7 +141,7 @@ function TelemetryDashboard() {
         </div>
       </div>
 
-      {/* 指标卡片网格 */}
+      {/* Metrics Card Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16, marginBottom: 36 }}>
         {metrics.map((m) => (
           <div
@@ -186,7 +186,7 @@ function TelemetryDashboard() {
         ))}
       </div>
 
-      {/* 架构数据流示意面板 */}
+      {/* Architecture Data Flow Topology Panel */}
       <div style={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: 12, padding: 24 }}>
         <h3 style={{ fontSize: 15, fontWeight: 700, margin: '0 0 12px 0', color: '#ffffff' }}>
           Distributed Streaming Architecture Topo

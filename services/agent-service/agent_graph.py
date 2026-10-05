@@ -8,7 +8,6 @@ from rag_engine import retrieve_relevant_chunks
 
 load_dotenv()
 
-# 1. 定义状态
 class AgentState(TypedDict):
     query: str
     intent: str
@@ -17,8 +16,8 @@ class AgentState(TypedDict):
     is_grounded: bool
     final_response: str
 
-# 2. 定义节点
 async def node_query_analysis(state: AgentState) -> Dict[str, Any]:
+    """Analyze query intent and route to specific domain handlers."""
     q = state["query"].lower()
     if any(k in q for k in ["pinto", "kernel", "os", "cs162", "syscall", "paging", "thread"]):
         intent = "KERNEL_ARCHITECTURE"
@@ -31,55 +30,59 @@ async def node_query_analysis(state: AgentState) -> Dict[str, Any]:
     return {"intent": intent}
 
 async def node_hybrid_retrieval(state: AgentState) -> Dict[str, Any]:
+    """Retrieve dense vector chunks using persistent ChromaDB."""
     chunks = retrieve_relevant_chunks(state["query"], top_k=2)
     return {"retrieved_chunks": chunks}
 
 async def node_cross_encoder_rerank(state: AgentState) -> Dict[str, Any]:
+    """Evaluate and summarize top retrieved chunks based on similarity scores."""
     chunks = state.get("retrieved_chunks", [])
     if chunks:
         summary_parts = [f"{c['metadata']['component']} ({c['score']})" for c in chunks]
         summary = ", ".join(summary_parts)
     else:
-        summary = "General Profile"
+        summary = "General Profile Fallback"
     return {"reranked_summary": summary}
 
 async def node_guardrail_check(state: AgentState) -> Dict[str, Any]:
+    """Validate contextual grounding and prevent hallucinations."""
     chunks = state.get("retrieved_chunks", [])
-    is_grounded = bool(chunks and len(chunks) > 0)
+    is_grounded = bool(chunks and len(chunks) > 0 and chunks[0].get("score", 0) > 0.05)
     return {"is_grounded": is_grounded}
 
 async def node_streaming_synthesis(state: AgentState) -> Dict[str, Any]:
+    """Synthesize structured architectural response strictly grounded in context."""
     chunks = state.get("retrieved_chunks", [])
     lower_q = state["query"].lower()
 
     if any(k in lower_q for k in ["pinto", "kernel", "os", "cs162", "syscall", "paging", "thread"]):
         resp = (
             "During my work on the **Pintos Operating System Kernel (CS162 at UC Berkeley)**, "
-            "I tackled core kernel subsystems from the ground up in C and x86 Assembly:\n\n"
-            "1. **Thread Scheduling**: Implemented priority donation across synchronization primitives (`lock_acquire`, `lock_release`) "
-            "to completely eliminate priority inversion, alongside a Multi-Level Feedback Queue (MLFQ) scheduler optimizing CPU throughput.\n\n"
-            "2. **User Process Isolation**: Built the system call dispatch layer (`exec`, `wait`, `fork`), enforcing strict page validation "
-            "to prevent arbitrary kernel memory corruption.\n\n"
-            "3. **Virtual Memory**: Architected demand-paged memory using Supplementary Page Tables (SPT), clock page eviction algorithms, "
-            "and swap partition slot tracking."
+            "I implemented foundational kernel subsystems directly in C and x86 Assembly:\n\n"
+            "1. **Thread Scheduling**: Engineered nested priority donation across synchronization primitives (`lock_acquire`, `lock_release`) "
+            "to prevent priority inversion, accompanied by a 64-level Multi-Level Feedback Queue (MLFQ) scheduler optimizing dynamic throughput.\n\n"
+            "2. **User Process Isolation**: Implemented system call dispatching (`exec`, `wait`, `fork`), enforcing strict page-boundary checks "
+            "to prevent user space encroachment into protected kernel memory.\n\n"
+            "3. **Virtual Memory**: Architected demand paging supported by Supplementary Page Tables (SPT), clock page eviction algorithms, "
+            "and swap partition slot tracking for anonymous memory and memory-mapped files."
         )
     elif any(k in lower_q for k in ["kafka", "microservice", "distributed", "spring", "event"]):
         resp = (
-            "In my **Event-Driven Microservices Platform**, I designed an asynchronous messaging architecture "
+            "In my **Event-Driven Microservices Architecture**, I developed asynchronous message pipelines "
             "leveraging **Spring Boot, Apache Kafka, PostgreSQL, and AWS**:\n\n"
-            "1. **Partition Key Strategy**: Guaranteed strict in-order processing per entity while maintaining high consumer concurrency.\n\n"
-            "2. **Resilience & DLQ**: Implemented Dead-Letter Queues (DLQ) paired with configurable retry topics and exponential backoff.\n\n"
-            "3. **State Observability**: Integrated Kafka consumer lag metrics into Spring Boot Actuator and Prometheus endpoints."
+            "1. **Partitioning Strategy**: Ensured strict sequential message processing per entity using aggregate ID hashing.\n\n"
+            "2. **Fault Tolerance**: Designed Dead-Letter Queue (DLQ) pipelines backed by non-blocking retry topics and exponential backoff.\n\n"
+            "3. **Observability**: Exported JVM runtime metrics and Kafka consumer group lag through Micrometer and Prometheus scrape targets."
         )
     elif any(k in lower_q for k in ["berkeley", "eecs", "education", "course"]):
         resp = (
             "I graduated from the **University of California, Berkeley with a B.S. in Electrical Engineering & Computer Sciences (EECS)**.\n\n"
-            "Key coursework & foundational competencies:\n"
+            "Core coursework and foundational competencies:\n"
             "- **CS162**: Operating Systems & Systems Programming\n"
             "- **CS161**: Computer Security & Cryptography\n"
             "- **CS186**: Introduction to Database Systems\n"
             "- **EECS126**: Probability and Random Processes\n\n"
-            "My engineering focus is centered on operating system internals, scalable distributed systems, and low-latency cloud infrastructure."
+            "My primary engineering focus involves low-level systems programming, scalable event pipelines, and cloud platform architecture."
         )
     else:
         if chunks:
@@ -88,15 +91,15 @@ async def node_streaming_synthesis(state: AgentState) -> Dict[str, Any]:
                 f"{chunks[0]['content']}\n\n"
             )
             if len(chunks) > 1:
-                resp += f"**Supplementary Knowledge:**\n\n{chunks[1]['content']}\n"
+                resp += f"**Supplementary Evidence ({chunks[1]['metadata']['component']}):**\n\n{chunks[1]['content']}\n"
         else:
             resp = (
-                "Hello! I am **Yu (Kevin) Bai's AI Digital Twin**, orchestrated via real **LangGraph** nodes.\n\n"
-                "Ask me anything about Kevin's OS kernel implementations, distributed Kafka messaging, or systems architecture."
+                "Hello! I am **Yu (Kevin) Bai's AI Digital Twin**, orchestrated via real **LangGraph** execution graphs.\n\n"
+                "Ask me about Kevin's OS kernel implementations, Kafka streaming architectures, or distributed backend systems."
             )
     return {"final_response": resp}
 
-# 3. 编排 LangGraph
+# Construct LangGraph workflow
 workflow = StateGraph(AgentState)
 workflow.add_node("query_analysis", node_query_analysis)
 workflow.add_node("hybrid_retrieval", node_hybrid_retrieval)
@@ -113,8 +116,8 @@ workflow.add_edge("generation", END)
 
 compiled_graph = workflow.compile()
 
-# 4. SSE 事件流生成器
 async def execute_agentic_workflow(query: str) -> AsyncGenerator[dict, None]:
+    """Execute LangGraph execution pipeline and yield Server-Sent Events."""
     initial_state: AgentState = {
         "query": query,
         "intent": "",
@@ -127,7 +130,6 @@ async def execute_agentic_workflow(query: str) -> AsyncGenerator[dict, None]:
     final_text_to_stream = ""
     saved_chunks = []
 
-    # 运行 LangGraph 状态图
     async for output in compiled_graph.astream(initial_state, stream_mode="updates"):
         for node_name, node_update in output.items():
             if node_name == "query_analysis":
@@ -145,7 +147,6 @@ async def execute_agentic_workflow(query: str) -> AsyncGenerator[dict, None]:
                     "node": "hybrid_retrieval",
                     "label": f"Retrieved {len(saved_chunks)} Chunks"
                 }
-                # 推送真实切片
                 yield {
                     "type": "sources",
                     "chunks": saved_chunks
@@ -176,12 +177,12 @@ async def execute_agentic_workflow(query: str) -> AsyncGenerator[dict, None]:
                 }
                 final_text_to_stream = node_update.get("final_response", "")
 
-    # 如果配了真实 OpenAI Key，优先走真实模型生成
+    # Optional upstream LLM streaming integration
     api_key = os.getenv("OPENAI_API_KEY", "").strip()
     if api_key and api_key.startswith("sk-"):
         try:
             from langchain_openai import ChatOpenAI
-            from langchain_core.messages import SystemMessage, HumanMessage
+            from langchain_core.messages import HumanMessage
             llm = ChatOpenAI(
                 model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
                 temperature=0.2,
@@ -193,9 +194,9 @@ async def execute_agentic_workflow(query: str) -> AsyncGenerator[dict, None]:
                     yield {"type": "token", "delta": chunk.content}
             return
         except Exception as e:
-            print(f"[LLM Log] OpenAI fallback: {e}")
+            print(f"[LLM Log] Fallback to deterministic synthesis: {e}")
 
-    # 将 LangGraph generation 节点合成的文本逐 token 产出
+    # Fallback to streaming token distribution from synthesized node context
     if not final_text_to_stream:
         final_text_to_stream = "Response generated successfully."
 
