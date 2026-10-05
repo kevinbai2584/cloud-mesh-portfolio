@@ -133,7 +133,7 @@ export function ProjectList() {
             </p>
             <div style={{ display: 'flex', gap: 16, fontSize: 13, color: '#94a3b8', flexWrap: 'wrap' }}>
               <span>📍 Walnut, CA</span>
-              <span>📞 </span>
+              <span>📞 (626) ***-8106 (Available upon request)</span>
               <span>✉️ <a href="mailto:yubai28@berkeley.edu" style={{ color: '#38bdf8', textDecoration: 'none' }}>yubai28@berkeley.edu</a></span>
             </div>
           </div>

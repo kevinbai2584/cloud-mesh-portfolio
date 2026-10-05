@@ -19,7 +19,7 @@ public class RedisConfig {
 
     @Bean
     public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
-        // 注意类名：JacksonJsonRedisSerializer (去掉了旧时代的 '2')
+        // JacksonJsonRedisSerializer
         JacksonJsonRedisSerializer<ProjectListResponse> serializer =
                 new JacksonJsonRedisSerializer<>(ProjectListResponse.class);
 
