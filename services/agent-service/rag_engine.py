@@ -34,7 +34,37 @@ CONS (DISADVANTAGES & TRADEOFFS):
    - Rebuilding the BM25 inverted index occurs whenever the corpus changes or service boots.
 ==============================================================================
 """
+"""
+============================================================
+1. Pure dense vector seach test (Pure Dense Vector Search)
+============================================================
+Rank 1 [Cosine Similarity: 0.7019]:
+## Thread Scheduling and Priority Donation
+In the Pintos OS (CS162 at UC Berkeley), multiple threads frequently compete ...
 
+Rank 2 [Cosine Similarity: 0.4493]:
+# Pintos Operating System Kernel...
+
+Rank 3 [Cosine Similarity: 0.4135]:          <------------------------------------      after use hybird search, this out
+Designed Dead-Letter Queue (DLQ) pipelines with exponential backoff retry topics to gracefully isolate unprocessable pay...
+
+============================================================
+2. Hybird seach test (BM25 + Dense Vector with RRF)
+============================================================
+Rank 1 [RRF Score: 0.0328 | Dense Sim: 0.7019]:
+## Thread Scheduling and Priority Donation
+In the Pintos OS (CS162 at UC Berkeley), multiple threads frequently compete ...
+
+Rank 2 [RRF Score: 0.0323 | Dense Sim: 0.4493]:
+# Pintos Operating System Kernel...
+
+Rank 3 [RRF Score: 0.0313 | Dense Sim: 0.2743]:      <------------------------------------  correct data in, prevented semantic drift
+## User Process Isolation and Syscall Layer
+Constructed the user memory protection and system call dispatching layer. Ha...
+
+
+
+"""
 import os
 from pathlib import Path
 
